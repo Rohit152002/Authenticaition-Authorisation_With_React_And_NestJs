@@ -36,6 +36,16 @@ const App = () => {
         >
           Profile
         </NavLink>
+        <NavLink
+          to="/product"
+          className={({ isActive }) =>
+            isActive
+              ? "bg-blue-500 text-white px-4 py-2"
+              : "text-black px-4 py-2"
+          }
+        >
+          product
+        </NavLink>
       </nav>
       <Outlet />
     </div>

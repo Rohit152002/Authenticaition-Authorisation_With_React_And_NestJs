@@ -1,70 +1,60 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UsersModule } from '@/users/users.module';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtStrategy } from './jwt.strategy';
+import { UsersService } from '../users/users.service';
+import { JwtAuthGuardToken } from './token.guard';
+import { JwtService } from '@nestjs/jwt'; // ✅ Import JwtService
+import { RolesGuard } from './roles.guard';
+import { UserRole } from '../users/entity/user.entity';
 
 describe('AuthController', () => {
-  let controller: AuthController;
+  let authController: AuthController;
+  let authService: AuthService;
+  let usersService: UsersService;
+
+  const mockAuthService = {
+    validateUser: jest.fn((email, password) => ({
+      id: 1,
+      email,
+      role: UserRole.USER,
+    })),
+    login: jest.fn(() => ({ access_token: 'mocked_token' })),
+  };
+
+  const mockUsersService = {
+    createUser: jest.fn((email, password, role) => ({
+      id: 1,
+      email,
+      role: role || UserRole.USER,
+    })),
+    findByEmail: jest.fn((email) => ({ id: 1, email, role: UserRole.USER })),
+  };
+
+  const mockJwtService = {
+    sign: jest.fn(() => 'mocked_token'),
+    verify: jest.fn(() => ({
+      id: 1,
+      email: 'test@test.com',
+      role: UserRole.USER,
+    })),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [UsersModule, PassportModule, JwtModule, TypeOrmModule],
-      providers: [AuthService, JwtStrategy],
       controllers: [AuthController],
-      exports: [AuthService, JwtModule],
+      providers: [
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: UsersService, useValue: mockUsersService },
+        { provide: JwtService, useValue: mockJwtService }, // ✅ Provide JwtService
+      ],
     }).compile();
 
-    controller = module.get<AuthController>(AuthController);
+    authController = module.get<AuthController>(AuthController);
+    authService = module.get<AuthService>(AuthService);
+    usersService = module.get<UsersService>(UsersService);
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(authController).toBeDefined();
   });
-
-  // it('should register a user', async () => {
-  //   const result = await controller.register({
-  //     email: 'test@test.com',
-  //     password: 'password',
-  //   });
-
-  //   expect(result).toEqual({ id: 1, email: 'test@test.com' });
-  //   expect(usersService.createUser).toHaveBeenCalledWith({
-  //     email: 'test@test.com',
-  //     password: 'password',
-  //   });
-  // });
-
-  // it('should login a user', async () => {
-  //   const result = await controller.login({
-  //     email: 'test@test.com',
-  //     password: 'password',
-  //   });
-
-  //   expect(result).toEqual({ access_token: 'token' });
-  //   expect(authService.validateUser).toHaveBeenCalledWith(
-  //     'test@test.com',
-  //     'password',
-  //   );
-  //   expect(authService.login).toHaveBeenCalledWith({
-  //     id: 1,
-  //     email: 'test@test.com',
-  //   });
-  // });
-
-  // it('should get profile', () => {
-  //   const req = { user: { id: 1, email: 'test@test.com' } };
-  //   const result = controller.getProfile(req);
-
-  //   expect(result).toEqual(req.user); // ✅ Fix expected result
-  // });
-
-  // it('should get admin data', () => {
-  //   const result = controller.getAdminData();
-
-  //   expect(result).toEqual({ message: 'This is admin-only data' });
-  // });
 });

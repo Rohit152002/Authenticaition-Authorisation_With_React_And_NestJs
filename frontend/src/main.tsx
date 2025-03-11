@@ -7,6 +7,9 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import LoginComponent from "./components/LoginComponent.tsx";
 import RegisterComponent from "./components/RegisterComponent.tsx";
 import ProfileComponent from "./components/ProfileComponent.tsx";
+import ProductPage from "./page/ProductPage.tsx";
+import ProductComponent from "./components/Product/ProductComponent.tsx";
+import CreateProduct from "./components/Product/CreateProduct.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -16,6 +19,10 @@ createRoot(document.getElementById("root")!).render(
         <Route index element={<LoginComponent />} />
         <Route path="/register" element={<RegisterComponent />} />
         <Route path="/profile" element={<ProfileComponent />} />
+      </Route>
+      <Route path="/product" element={<ProductPage />}>
+        <Route index element={<ProductComponent />} />
+        <Route path="create" element={<CreateProduct />} />
       </Route>
     </Routes>
     {/* </StrictMode>, */}

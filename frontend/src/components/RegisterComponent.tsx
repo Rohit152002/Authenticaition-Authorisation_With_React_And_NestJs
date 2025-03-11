@@ -19,7 +19,9 @@ const RegisterComponent = () => {
       pending: "pending",
       success: {
         theme: "colored",
-        data: "register successfull",
+        render({ data }) {
+          return data.data.email;
+        },
       },
       error: {
         render({ data }) {
